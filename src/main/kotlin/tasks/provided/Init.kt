@@ -16,6 +16,7 @@ object Init: Task(
         TaskArgument(false, "name", true, listOf("-n", "--name")),
         TaskArgument(false, "author", false, listOf("-a" , "--author")),
         TaskArgument(true, "confirm", false, listOf("-y"), true),
+        TaskArgument(true, "noCats", false, listOf("--ilovedogs", "--nocats"), true),
     )
 ) {
     override fun call(args: List<String>) {
@@ -24,6 +25,8 @@ object Init: Task(
         var path: File
         var name: String
         var author: String
+        val noCats = readArg("noCats", args) != null
+
         val confirmed: String? = readArg("confirm", args)
 
         do {
@@ -39,11 +42,11 @@ object Init: Task(
         } while (!correct)
 
         logger.info("Creating project...")
-        generate(name, path, author)
+        generate(name, path, author, noCats)
     }
 
 
-    private fun generate(name: String, path: File, author: String) {
+    private fun generate(name: String, path: File, author: String, noCats: Boolean) {
         // For now it's just a example of project generation, there's even no platform selection!
         val httpClient = Constants.httpClient
 
@@ -70,7 +73,7 @@ object Init: Task(
             
            ---
            Please leave at least some information about the tool with which Modpack was created ^_^
-           <img src="screenshots/meow.jpg">
+           ${if (!noCats) "<img src=\"screenshots/meow.jpg\">" else ""}
         """.trimIndent()
 
         logger.info("Writing readme")
@@ -79,13 +82,15 @@ object Init: Task(
         readmeFile.createNewFile()
         readmeFile.writeText(readmeText)
 
-        logger.info("Meow!")
-        runBlocking {
-            val response = httpClient.get("https://cataas.com/cat")
-            val catFile = File(path, "screenshots/meow.jpg")
-            catFile.parentFile.mkdirs()
-            catFile.createNewFile()
-            catFile.writeBytes(response.body())
+        if (!noCats) {
+            logger.info("Meow!")
+            runBlocking {
+                val response = httpClient.get("https://cataas.com/cat")
+                val catFile = File(path, "screenshots/meow.jpg")
+                catFile.parentFile.mkdirs()
+                catFile.createNewFile()
+                catFile.writeBytes(response.body())
+            }
         }
 
         logger.info("")

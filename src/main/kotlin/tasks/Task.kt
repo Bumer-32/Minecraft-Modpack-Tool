@@ -56,19 +56,22 @@ data class TaskArgument(val optional: Boolean,
 
     fun read(inputArgs: List<String>): String? {
         args.forEach { arg ->
-            val cliArg = inputArgs.withIndex().find { it.value == arg }
+            val cliArg = inputArgs.withIndex().find {
+                it.value == arg
+            }
 
             if (noData) {
                 if (cliArg != null) return cliArg.value
-                else return null
-            }
-
-            if (cliArg != null && check.invoke(inputArgs[cliArg.index + 1])) {
-                return inputArgs[cliArg.index + 1]
-            } else if (cliArg == null && optional) {
-                return default
+            } else {
+                if (cliArg != null && check.invoke(inputArgs[cliArg.index + 1])) {
+                    return inputArgs[cliArg.index + 1]
+                } else if (cliArg == null && optional) {
+                    return default
+                }
             }
         }
+
+        if (noData) return null
 
         var value: String
         do {
