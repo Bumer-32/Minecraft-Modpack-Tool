@@ -1,10 +1,14 @@
 <configuration>
-    <if condition='property("debug").equals("true")'>
+    <if condition='!property("quiet").equals("true")'>
         <then>
-            <include resource="logback-debug.xml"/>
+            <if condition='property("debug").equals("true")'>
+                <then>
+                    <include resource="logback-debug.xml"/>
+                </then>
+                <else>
+                    <include resource="logback-release.xml"/>
+                </else>
+            </if>
         </then>
-        <else>
-            <include resource="logback-release.xml"/>
-        </else>
     </if>
 </configuration>

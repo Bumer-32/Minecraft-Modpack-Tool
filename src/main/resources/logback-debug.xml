@@ -29,7 +29,7 @@
         </encoder>
     </appender>
 
-    <root level="debug">
+    <root level="trace">
         <appender-ref ref="LATEST_FILE" />
         <appender-ref ref="TIMESTAMPED_FILE" />
         <appender-ref ref="STDOUT" />

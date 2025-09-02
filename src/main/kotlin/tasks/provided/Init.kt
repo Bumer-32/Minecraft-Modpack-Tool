@@ -5,49 +5,41 @@ import io.ktor.client.request.get
 import kotlinx.coroutines.runBlocking
 import ua.pp.lumivoid.Constants
 import ua.pp.lumivoid.tasks.Task
+import ua.pp.lumivoid.tasks.TaskArgument
 import java.io.File
 
 object Init: Task(
     "init",
     "Initializes project",
+    listOf(
+        TaskArgument(false, "path", true, listOf("-p", "--path"), default = System.getProperty("user.dir").replace("\\", "/")) { input -> !runCatching { File(input) }.isFailure },
+        TaskArgument(false, "name", true, listOf("-n", "--name")),
+        TaskArgument(false, "author", false, listOf("-a" , "--author")),
+        TaskArgument(true, "confirm", false, listOf("-y"), true),
+    )
 ) {
-    override fun call() {
-        while (true) {
-            var path: File? = null
-            var name: String
-            var author: String
+    override fun call(args: List<String>) {
+        logger.debug("Args: ${args.joinToString(" ")}")
 
-            do {
-                logger.info("Select name: ")
-                name = readln()
-            } while (name.isEmpty())
+        var path: File
+        var name: String
+        var author: String
+        val confirmed: String? = readArg("confirm", args)
 
-            do {
-                val result = runCatching {
-                    print("Select directory[default: ${System.getProperty("user.dir").replace("\\", "/")}/$name]: ")
-                    path = File(readln().ifEmpty { name })
-                }
-            } while (result.isFailure)
-
-            logger.info("Select author: ")
-            author = readln()
+        do {
+            path = File(readArg("path", args)!!)
+            name = readArg("name", args)!!
+            author = readArg("author", args)!!
 
             logger.info("name: $name")
-            logger.info("path: ${path!!.absolutePath}")
+            logger.info("path: ${path.absolutePath}")
             logger.info("author: $author")
 
-            logger.info("Is all information correct? [y/n]")
-            val isCorrect = readln().lowercase()
-            if (isCorrect  != "y" && isCorrect != "yes") {
-                logger.info("Try again:")
-                continue
-            }
+            val correct = if (confirmed == null) checkIsCorrect() else true
+        } while (!correct)
 
-            logger.info("Creating project...")
-            generate(name, path, author)
-
-            break
-        }
+        logger.info("Creating project...")
+        generate(name, path, author)
     }
 
 

@@ -1,28 +1,61 @@
 package ua.pp.lumivoid
 
-import ua.pp.lumivoid.tasks.Task
+import kotlin.collections.forEach
+import kotlin.text.forEach
 
 object ArgsParser {
-    private val tasks: MutableSet<TaskData> = mutableSetOf()
-
-    fun registerTask(name: String, description: String, task: Task) {
-        tasks.add(TaskData(name, description, task))
-    }
+    // ! important NOT TO INITIALIZE LOGGER HERE
 
     /*
-    * For now, it's parsing only tasks
+    processing args for program, not for tasks
     */
-    fun parse(args: Array<String>) {
-        val task = tasks.find { it.name == args[0] }
-        task?.task?.call()
+    fun processArgs(args: Array<String>) {
+        val parsedArgs = parseArgs(args).takeWhile { it.startsWith("-") } // if not starts with -, then it's for task
 
+        parsedArgs.forEach { arg ->
+            ArgsFunctions.entries.forEach inner@ { entry ->
+                if (arg in entry.args) {
+                    entry.call()
+                    return@inner
+                }
+            }
+        }
     }
 
-    fun list(): Set<TaskData> = tasks
-}
+    fun parseArgs(args: Array<String>): List<String> {
+        val parsedArgs = mutableListOf<String>()
 
-data class TaskData(val name: String, val description: String, val task: Task) {
-    fun represent(): String {
-        return "$name -> $description"
+        args.forEach { arg ->
+
+            if (arg.startsWith("-") && arg[1] != '-') {
+                if (arg.length > 2) {
+                    arg.forEach {
+                        parsedArgs.add("-$it") // -q -p -t -f instead of -qptf
+                    }
+                }
+                else parsedArgs.add(arg)
+            }
+            else parsedArgs.add(arg)
+        }
+
+        return parsedArgs
+    }
+
+
+    private enum class ArgsFunctions(vararg val args: String) {
+        QuietMode("-q", "--quiet") {
+            override fun call() {
+                isQuietMode = true
+                System.setProperty("quiet", "true")
+            }
+        },
+        Debug("-d", "--debug") {
+            override fun call() {
+                System.setProperty("debug", "true")
+            }
+        },
+        ;
+
+        abstract fun call()
     }
 }
