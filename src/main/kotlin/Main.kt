@@ -3,6 +3,7 @@ package ua.pp.lumivoid
 import org.slf4j.LoggerFactory
 import org.slf4j.bridge.SLF4JBridgeHandler
 import ua.pp.lumivoid.tasks.TasksParser
+import ua.pp.lumivoid.tasks.provided.Help
 import ua.pp.lumivoid.tasks.provided.Init
 import ua.pp.lumivoid.tasks.provided.Tasks
 import java.util.logging.Level
@@ -25,9 +26,9 @@ fun main(args: Array<String>) {
     //jline logger
     Logger.getLogger("org.jline").level = Level.FINE
 
+    Help.register() // important to register first
     Tasks.register()
     Init.register()
-
 
     TasksParser.processTask(args)
 

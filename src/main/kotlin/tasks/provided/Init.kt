@@ -10,13 +10,55 @@ import java.io.File
 
 object Init: Task(
     "init",
-    "Initializes project",
+    "Initializes project creation",
     listOf(
-        TaskArgument(false, "path", true, listOf("-p", "--path"), default = System.getProperty("user.dir").replace("\\", "/")) { input -> !runCatching { File(input) }.isFailure },
-        TaskArgument(false, "name", true, listOf("-n", "--name")),
-        TaskArgument(false, "author", false, listOf("-a" , "--author")),
-        TaskArgument(true, "confirm", false, listOf("-y"), true),
-        TaskArgument(true, "noCats", false, listOf("--ilovedogs", "--nocats"), true),
+        TaskArgument(
+            name = "path",
+            description = "Path where project will be created (folder must be empty if not --force)",
+            required = true,
+            isNotEmpty = true,
+            hasValue = true,
+            aliases = listOf("-p", "--path"),
+            default = System.getProperty("user.dir").replace("\\", "/"),
+            validator = { input -> !runCatching { File(input) }.isFailure }
+        ),
+        TaskArgument(
+            name = "name",
+            description = "Specifies name of project",
+            required = true,
+            isNotEmpty = true,
+            hasValue = true,
+            listOf("-n", "--name")
+        ),
+        TaskArgument(
+            name = "author",
+            description = "Specifies author of project",
+            required = true,
+            isNotEmpty = false,
+            hasValue = true,
+            listOf("-a" , "--author")
+        ),
+        TaskArgument(
+            name = "confirm",
+            description = "If yes, you don't need to answer is your information correct",
+            required = false,
+            hasValue = false,
+            aliases = listOf("-y"),
+        ),
+        TaskArgument(
+            name = "noCats",
+            description = "If you hate cats, cat screenshot will not be created in readme",
+            required = false,
+            hasValue = false,
+            aliases = listOf("--ilovedogs", "--nocats")
+        ),
+        TaskArgument(
+            name = "force",
+            description = "Forces to create if possible",
+            required = false,
+            hasValue = false,
+            aliases = listOf("-f", "--force")
+        )
     )
 ) {
     override fun call(args: List<String>) {
@@ -26,6 +68,7 @@ object Init: Task(
         var name: String
         var author: String
         val noCats = readArg("noCats", args) != null
+        val force = readArg("force", args) != null
 
         val confirmed: String? = readArg("confirm", args)
 
@@ -40,6 +83,11 @@ object Init: Task(
 
             val correct = if (confirmed == null) checkIsCorrect() else true
         } while (!correct)
+
+        if (path.listFiles().isNotEmpty() && !force) {
+            logger.error("Folder is not empty!")
+            return
+        }
 
         logger.info("Creating project...")
         generate(name, path, author, noCats)

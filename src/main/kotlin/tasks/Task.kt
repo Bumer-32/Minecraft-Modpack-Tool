@@ -9,15 +9,7 @@ abstract class Task(val name: String, val description: String = "No description 
     abstract fun call(args: List<String>)
 
     fun register() {
-        val args = mutableListOf<String>()
-
-        taskArgs.forEach { arg ->
-            arg.args.forEach { argArg ->
-                args.add(argArg)
-            }
-        }
-
-        TasksParser.registerTask(this.name, this.description, this, args.sorted())
+        TasksParser.registerTask(this)
     }
 
     /*
@@ -39,45 +31,54 @@ abstract class Task(val name: String, val description: String = "No description 
 }
 
 /*
-Creates argument for task, if it optional it will be avail only as cli argument (-a)
-if it not optional user will be asked if cli argument not specified
-No data needs for simple args without reading data like -y
+    val name: String,
+    val description: String,
+    val required: Boolean, - is user will be asked if cli argument not specialised
+    val isNotEmpty: Boolean, - can be ""?
+    val hasValue: Boolean, - --yes -> no value, --name myname -> value
+    val aliases: List<String>,
+    val default: String? = null,
+    val validator: (input: String) -> Boolean = { input ->
+        if (isNotEmpty) input.isNotEmpty() else true
+    },
  */
-data class TaskArgument(val optional: Boolean,
-                        val name: String,
-                        val isNotEmpty: Boolean,
-                        val args: List<String>,
-                        val noData: Boolean = false,
-                        val default: String? = null,
-                        val check: (input: String) -> Boolean = { input ->
-                            if (isNotEmpty) input.isNotEmpty() else true
-                        },
+data class TaskArgument(
+    val name: String,
+    val description: String,
+    val required: Boolean,
+    val isNotEmpty: Boolean? = null,
+    val hasValue: Boolean,
+    val aliases: List<String>,
+    val default: String? = null,
+    val validator: (input: String) -> Boolean = { input ->
+        if (isNotEmpty!!) input.isNotEmpty() else true
+    },
 ) {
 
     fun read(inputArgs: List<String>): String? {
-        args.forEach { arg ->
+        aliases.forEach { arg ->
             val cliArg = inputArgs.withIndex().find {
                 it.value == arg
             }
 
-            if (noData) {
-                if (cliArg != null) return cliArg.value
-            } else {
-                if (cliArg != null && check.invoke(inputArgs[cliArg.index + 1])) {
+            if (hasValue) {
+                if (cliArg != null && validator.invoke(inputArgs[cliArg.index + 1])) {
                     return inputArgs[cliArg.index + 1]
-                } else if (cliArg == null && optional) {
+                } else if (cliArg == null && !required) {
                     return default
                 }
+            } else {
+                if (cliArg != null) return cliArg.value
             }
         }
 
-        if (noData) return null
+        if (!hasValue) return null
 
         var value: String
         do {
             print("$name${if (default == null) "" else " [$default]"}: ")
             value = readln()
-        } while (!check.invoke(value))
+        } while (!validator.invoke(value))
 
         if (value.trim().isEmpty() && default != null) value = default
 

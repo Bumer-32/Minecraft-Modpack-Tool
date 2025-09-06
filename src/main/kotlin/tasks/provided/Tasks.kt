@@ -9,8 +9,16 @@ object Tasks: Task(
 ) {
     override fun call(args: List<String>) {
         logger.info("Current provided tasks:")
-        logger.info("-".repeat(40))
-        TasksParser.list().forEach { logger.info(it.represent()) }
-        logger.info("-".repeat(40))
+        logger.info("")
+        TasksParser.list().forEach { task ->
+            var arguments = ""
+            task.taskArgs.forEach { arg ->
+                arg.aliases.forEach { alias ->
+                    arguments += "$alias "
+                }
+            }
+
+            logger.info("${task.name} ${if (arguments.isNotEmpty()) { "[${arguments}] " } else { "" }}-> ${task.description}")
+        }
     }
 }
