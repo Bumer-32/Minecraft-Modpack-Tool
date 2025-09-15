@@ -42,3 +42,15 @@ dependencies {
 kotlin {
     jvmToolchain(21)
 }
+
+tasks.processResources {
+    dependsOn("packageSampleProject")
+}
+
+tasks.register("packageSampleProject", Zip::class) {
+    group = "build"
+
+    archiveFileName.set("sample.zip")
+    destinationDirectory.set(file("build/resources/main/"))
+    from("src/main/resources/sample")
+}

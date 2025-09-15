@@ -44,6 +44,7 @@ abstract class Task(val name: String, val description: String = "No description 
  */
 data class TaskArgument(
     val name: String,
+
     val description: String,
     val required: Boolean,
     val isNotEmpty: Boolean? = null,

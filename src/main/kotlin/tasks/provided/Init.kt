@@ -6,6 +6,7 @@ import kotlinx.coroutines.runBlocking
 import ua.pp.lumivoid.Constants
 import ua.pp.lumivoid.tasks.Task
 import ua.pp.lumivoid.tasks.TaskArgument
+import ua.pp.lumivoid.util.Zip
 import java.io.File
 
 object Init: Task(
@@ -90,45 +91,45 @@ object Init: Task(
         }
 
         logger.info("Creating project...")
-        generate(name, path, author, noCats)
+        generate(path,
+            noCats,
+            mapOf(
+                "name" to name,
+                "author" to author,
+                "platform" to "fabric",
+                "minecraft" to "1.21.8",
+                "loader" to "0.17.2"
+
+            )
+        )
     }
 
 
-    private fun generate(name: String, path: File, author: String, noCats: Boolean) {
-        // For now it's just a example of project generation, there's even no platform selection!
+    private fun generate(path: File, noCats: Boolean, params: Map<String, String>) {
         val httpClient = Constants.httpClient
 
-        val readmeText = """
-            # $name  
-            by: $author  
-            
-            This is a project created by [Minecraft Modpack Tool by Bumer_32](https://github.com/Bumer-32/Minecraft-Modpack-Tool)  
-            Now there's nothing interesting, but in future it must be a cool project
-            
-            ---
-            <!-- exclude.start -->
-            This block will be excluded on build
-            <!-- exclude.end -->
-            
-            <!-- modrinth.exclude.start -->
-            This block will be excluded on modrinth
-            <!-- modrinth.exclude.end -->
-            
-            <!-- curseforge.exclude.start -->
-            This block will be excluded on curseforge
-            <!-- curseforge.exclude.end -->
-            
-            
-           ---
-           Please leave at least some information about the tool with which Modpack was created ^_^
-           ${if (!noCats) "<img src=\"screenshots/meow.jpg\">" else ""}
-        """.trimIndent()
+        logger.info("Coping sample.zip...")
+        path.mkdirs()
+        val sample = File(path, "sample.zip")
+        sample.writeBytes(javaClass.getResource("/sample.zip")!!.readBytes())
+        Zip.unzipToFolder(sample, path)
+        sample.delete()
 
-        logger.info("Writing readme")
-        val readmeFile = File(path, "README.md")
-        readmeFile.parentFile.mkdirs()
-        readmeFile.createNewFile()
-        readmeFile.writeText(readmeText)
+        logger.info("Applying params...")
+        path.walk().forEach { file ->
+            if (file.isFile) {
+                val lines = file.readLines().toMutableList()
+                lines.forEachIndexed { i, line ->
+                    params.forEach { param ->
+                        if (line.contains("^{${param.key}}^")) {
+                            lines[i] = line.replace("^{${param.key}}^", param.value)
+                        }
+                    }
+                }
+                file.writeText(lines.joinToString("\n"))
+            }
+        }
+
 
         if (!noCats) {
             logger.info("Meow!")
@@ -139,6 +140,14 @@ object Init: Task(
                 catFile.createNewFile()
                 catFile.writeBytes(response.body())
             }
+
+            val readme = File(path, "README.md")
+            val lines = readme.readLines().toMutableList()
+            val index = lines.withIndex().find { it.value.contains("^{cat}^") }?.index
+            if (index != null) {
+                lines[index] = "<img src=\"screenshots/meow.jpg\">"
+            }
+            readme.writeText(lines.joinToString("\n"))
         }
 
         logger.info("")

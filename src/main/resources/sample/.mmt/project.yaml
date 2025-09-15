@@ -1,0 +1,7 @@
+project:
+  name: ^{name}^ # sample
+  author: ^{author}^ # me
+  version: 1.0
+  platform: ^{platform}^ # fabric
+  minecraft: ^{minecraft}^ # 1.21.8
+  loader: ^{loader}^ # 0.17.2 for fabric
