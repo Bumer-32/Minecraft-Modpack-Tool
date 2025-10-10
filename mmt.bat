@@ -9,4 +9,11 @@ call gradlew shadowJar
 
 popd
 
+echo .
+echo .
+echo .
+echo .
+echo .
+
+
 java -jar %~dp0\build\libs\MinecraftModpackTool-1.0-SNAPSHOT-all.jar %*

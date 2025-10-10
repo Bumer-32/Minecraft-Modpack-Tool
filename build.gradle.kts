@@ -1,3 +1,5 @@
+import java.util.Properties
+
 plugins {
     kotlin("jvm") version "2.2.0"
     kotlin("plugin.serialization") version "2.2.0"
@@ -36,7 +38,9 @@ dependencies {
 
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.9.0")
 
-    implementation("org.jline:jline:3.30.0")
+//    implementation("org.jline:jline:3.30.0")
+
+    implementation("info.picocli:picocli:4.7.7")
 }
 
 kotlin {
@@ -45,6 +49,7 @@ kotlin {
 
 tasks.processResources {
     dependsOn("packageSampleProject")
+    dependsOn("generateVersionProperties")
 }
 
 tasks.register("packageSampleProject", Zip::class) {
@@ -53,4 +58,24 @@ tasks.register("packageSampleProject", Zip::class) {
     archiveFileName.set("sample.zip")
     destinationDirectory.set(file("build/resources/main/"))
     from("src/main/resources/sample")
+}
+
+
+val generatedVersionDir = layout.buildDirectory.dir("generated-version")
+
+sourceSets {
+    named("main") {
+        output.dir(mapOf("builtBy" to "generateVersionProperties"), generatedVersionDir.get().asFile)
+    }
+}
+
+tasks.register("generateVersionProperties") {
+    doLast {
+        val propertiesFile = generatedVersionDir.get().file("version.properties").asFile
+        propertiesFile.parentFile.mkdirs()
+        val properties = Properties().apply {
+            setProperty("version", rootProject.version.toString())
+        }
+        propertiesFile.outputStream().use { out -> properties.store(out, null) }
+    }
 }
