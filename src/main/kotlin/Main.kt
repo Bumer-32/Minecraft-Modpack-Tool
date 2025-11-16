@@ -5,6 +5,8 @@ import ch.qos.logback.classic.joran.JoranConfigurator
 import org.slf4j.LoggerFactory
 import org.slf4j.bridge.SLF4JBridgeHandler
 import picocli.CommandLine
+import ua.pp.lumivoid.project.Project
+import ua.pp.lumivoid.tasks.Clean
 import ua.pp.lumivoid.tasks.DownloadGame
 import ua.pp.lumivoid.tasks.Game
 import ua.pp.lumivoid.tasks.Init
@@ -48,6 +50,8 @@ fun main(args: Array<String>) {
             readln()
         }
 
+        if (Project.read() == null) exitProcess(1)
+
         CommandLine.RunAll().execute(parseResult)
     }
 
@@ -72,6 +76,7 @@ class VersionProvider: CommandLine.IVersionProvider {
         Init::class,
         Game::class,
         DownloadGame::class,
+        Clean::class
     ],
     mixinStandardHelpOptions = true,
     versionProvider = VersionProvider::class

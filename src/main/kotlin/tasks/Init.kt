@@ -47,6 +47,8 @@ object Init: Callable<Int> {
     private var confirm = false
 
     override fun call(): Int {
+        logger.info("Task: init")
+
         do {
             var fail = false
 

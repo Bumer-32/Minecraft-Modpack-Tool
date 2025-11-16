@@ -14,6 +14,8 @@ object DownloadGame: Callable<Int> {
     private val logger = LoggerFactory.getLogger(javaClass)
 
     override fun call(): Int {
+        logger.info("Task: download game...")
+
         logger.info("Reading project...")
         if (Project.read() == null) return 1
         val project = Project.read()!!.project
@@ -38,17 +40,20 @@ object DownloadGame: Callable<Int> {
         val librariesFolder = File(Project.gameFolder, "libraries")
         librariesFolder.deleteRecursively()
         librariesFolder.mkdirs()
+        val assetsFolder = File(Project.gameFolder, "assets")
+        assetsFolder.deleteRecursively()
+        assetsFolder.mkdirs()
 
         logger.info("Starting installation...")
         val result = project.platform.realisation.install(project.minecraft, project.loader, Project.gameFolder)
 
-        if (result == 0) {
+        if (result) {
             logger.info("Your game successfully installed!")
             return 0
         }
         else {
-            logger.error("Error installing game $result")
-            return result
+            logger.error("Error while installing game")
+            return 1
         }
     }
 }

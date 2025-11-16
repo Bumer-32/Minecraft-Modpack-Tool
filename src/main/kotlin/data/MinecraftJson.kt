@@ -7,6 +7,7 @@ import kotlinx.serialization.json.Json
 
 @Serializable
 data class MinecraftJson(
+    val assetIndex: AssetIndex,
     val downloads: Downloads,
     val id: String,
     val libraries: List<Library>,
@@ -21,6 +22,15 @@ data class MinecraftJson(
             return json.decodeFromString<MinecraftJson>(str)
         }
     }
+
+    @Serializable
+    data class AssetIndex(
+        val id: String,
+        val sha1: String,
+        val size: Long,
+        val totalSize: Long,
+        val url: String
+    )
 
     @Serializable
     data class Downloads(
