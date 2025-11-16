@@ -37,6 +37,7 @@ dependencies {
     implementation("io.ktor:ktor-client-cio:3.2.3")
 
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.9.0")
+    implementation("com.charleskorn.kaml:kaml:0.102.0")
 
 //    implementation("org.jline:jline:3.30.0")
 
