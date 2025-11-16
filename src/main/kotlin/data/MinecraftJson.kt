@@ -2,7 +2,6 @@ package ua.pp.lumivoid.data
 
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
-import ua.pp.lumivoid.util.OS
 
 // https://piston-meta.mojang.com/v1/packages/a112787401cbfa9cafc848d81be2f87e3f760e3e/1.21.8.json
 
@@ -38,12 +37,12 @@ data class MinecraftJson(
     @Serializable
     data class Library(
         val downloads: Downloads,
-        val rules: List<Rule>?
+        val name: String,
+        val rules: List<Rule>? = null
     ) {
         @Serializable
         data class Downloads(
-            val artifact: Artifact,
-            val name: String
+            val artifact: Artifact
         ) {
             @Serializable
             data class Artifact(
@@ -56,7 +55,13 @@ data class MinecraftJson(
 
         @Serializable
         data class Rule(
-            @Serializable(with = OS.OsSerializer::class) val os: OS
-        )
+            val action: String,
+            val os: OS
+        ) {
+            @Serializable
+            data class OS(
+                @Serializable(with = ua.pp.lumivoid.util.OS.OsSerializer::class) val name: ua.pp.lumivoid.util.OS,
+            )
+        }
     }
 }

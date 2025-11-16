@@ -1,9 +1,9 @@
 package ua.pp.lumivoid.project.platform
 
+import java.io.File
+
 interface Platform {
     fun getGameVersions(): Map<String, Boolean>
     fun getLoaderVersions(): Map<String, Boolean>
-    fun install(version: String, loaderVersion: String)
-    fun check(): Boolean
-    fun libraries()
+    fun install(version: String, loaderVersion: String, path: File): Int
 }

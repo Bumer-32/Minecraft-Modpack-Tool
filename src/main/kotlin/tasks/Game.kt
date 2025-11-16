@@ -13,7 +13,7 @@ object Game: Callable<Int> {
     private val logger = LoggerFactory.getLogger(javaClass)
 
     override fun call(): Int {
-        logger.info(Project.read().project.platform.platformName)
+        logger.info(Project.read()!!.project.platform.platformName)
 
         return 0
     }

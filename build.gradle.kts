@@ -46,6 +46,9 @@ dependencies {
     // ttps://github.com/charleskorn/kaml/releases/latest
     implementation("com.charleskorn.kaml:kaml:0.103.0")
 
+    // https://mvnrepository.com/artifact/commons-codec/commons-codec
+    implementation("commons-codec:commons-codec:1.20.0")
+
 //    implementation("org.jline:jline:3.30.0")
 
     // https://picocli.info/

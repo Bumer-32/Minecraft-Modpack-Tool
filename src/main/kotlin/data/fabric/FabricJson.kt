@@ -26,8 +26,8 @@ data class FabricJson(
     data class Library(
         val name: String,
         val url: String,
-        val sha1: String,
-        val size: Long
+//        val sha1: String, // sometimes it's missing
+//        val size: Long
     )
 
 }

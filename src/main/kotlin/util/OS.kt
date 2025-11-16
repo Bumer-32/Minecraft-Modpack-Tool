@@ -14,9 +14,12 @@ enum class OS {
     companion object {
         private val curr = System.getProperty("os.name").lowercase()
 
-        fun current(): OS = when {
-            curr.contains("win") -> WINDOWS
-            curr.contains("mac") -> MACOS
+        fun current(): OS = parse(curr)
+
+        fun parse(os: String): OS = when {
+            os.contains("win") -> WINDOWS
+            os.contains("mac") -> MACOS
+            os.contains("mac") -> MACOS
             else -> LINUX
         }
     }
@@ -25,6 +28,6 @@ enum class OS {
     @Serializer(forClass = OS::class)
     object OsSerializer : KSerializer<OS> {
         override val descriptor: SerialDescriptor = PrimitiveSerialDescriptor("OS", PrimitiveKind.STRING)
-        override fun deserialize(decoder: Decoder): OS = OS.current()
+        override fun deserialize(decoder: Decoder): OS = OS.parse(decoder.decodeString().lowercase())
     }
 }
