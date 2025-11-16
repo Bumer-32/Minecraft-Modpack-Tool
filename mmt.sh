@@ -13,4 +13,4 @@ echo
 echo
 
 # run jar
-java -jar "$SCRIPT_DIR/build/libs/MinecraftModpackTool-1.0-SNAPSHOT-all.jar" "$@"
+java -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5005 -jar "$SCRIPT_DIR/build/libs/MinecraftModpackTool-1.0-SNAPSHOT-all.jar" "$@"

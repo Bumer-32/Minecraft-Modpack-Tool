@@ -13,4 +13,4 @@ echo.
 echo.
 echo.
 
-java -jar %~dp0\build\libs\MinecraftModpackTool-1.0-SNAPSHOT-all.jar %*
+java -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5005 -jar %~dp0\build\libs\MinecraftModpackTool-1.0-SNAPSHOT-all.jar %*

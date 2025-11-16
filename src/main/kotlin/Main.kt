@@ -22,8 +22,8 @@ fun main(args: Array<String>) {
     cmd.executionStrategy = CommandLine.IExecutionStrategy { parseResult ->
         val main = cmd.commandSpec.commandLine().getCommand<Main>()
 
-        if(main.quiet) System.setProperty("quiet", "true")
-        if(main.debug) System.setProperty("debug", "true")
+        if (main.quiet) System.setProperty("quiet", "true")
+        if (main.debug) System.setProperty("debug", "true")
 
         // reload configuration
         val context = LoggerFactory.getILoggerFactory() as LoggerContext
@@ -42,6 +42,11 @@ fun main(args: Array<String>) {
         // redirect java logging
         SLF4JBridgeHandler.removeHandlersForRootLogger()
         SLF4JBridgeHandler.install()
+
+        if (main.wait) {
+            logger.info("Press any key to continue")
+            readln()
+        }
 
         CommandLine.RunAll().execute(parseResult)
     }
@@ -78,6 +83,9 @@ object Main: Callable<Int> {
 
     @CommandLine.Option(names = ["-d", "--debug"], description = ["Enables debug logging"])
     var debug = false
+
+    @CommandLine.Option(names = ["-w", "--wait"], description = ["Wait for any key to continue work, for debugging"])
+    var wait = false
 
     override fun call(): Int {
         return 0
