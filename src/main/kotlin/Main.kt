@@ -37,6 +37,7 @@ fun main(args: Array<String>) {
         val logger = LoggerFactory.getLogger("mmt")
 
         logger.info("Starting Minecraft Modpack Tool!")
+        logger.debug("DEBUG")
 
         // redirect java logging
         SLF4JBridgeHandler.removeHandlersForRootLogger()

@@ -1,7 +1,15 @@
 <configuration>
-    <if condition='!property("quiet").equals("true")'>
-        <then>
-            <if condition='property("debug").equals("true")'>
+    <condition class="ch.qos.logback.core.boolex.PropertyEqualityCondition">
+        <key>quiet</key>
+        <value>true</value>
+    </condition>
+    <if>
+        <else>
+            <condition class="ch.qos.logback.core.boolex.PropertyEqualityCondition">
+                <key>debug</key>
+                <value>true</value>
+            </condition>
+            <if>
                 <then>
                     <include resource="logback-debug.xml"/>
                 </then>
@@ -9,6 +17,6 @@
                     <include resource="logback-release.xml"/>
                 </else>
             </if>
-        </then>
+        </else>
     </if>
 </configuration>
