@@ -11,8 +11,11 @@ import ua.pp.lumivoid.data.MinecraftJson
 import ua.pp.lumivoid.data.fabric.FabricJson
 import ua.pp.lumivoid.data.fabric.Game
 import ua.pp.lumivoid.data.fabric.Loader
+import ua.pp.lumivoid.project.Project
 import ua.pp.lumivoid.util.OS
 import java.io.File
+import kotlin.random.Random
+import kotlin.random.nextInt
 
 @Suppress("DuplicatedCode", "LoggingSimilarMessage")
 object Fabric: Platform() {
@@ -87,8 +90,70 @@ object Fabric: Platform() {
         return@runBlocking true
     }
 
-    override fun launch(mcArgs: String, jvmArgs: String, version: String, loaderVersion: String, path: File) {
-        TODO("Not yet implemented")
+    override fun launch(version: String, loaderVersion: String, path: File, mcArgs: String?, jvmArgs: String?) {
+        val mcFolder = File(path, "versions/fabric-loader-$loaderVersion-$version")
+        val librariesFolder = File(path, "libraries")
+        val assetsFolder = File(path, "assets")
+        val nativesFolder = File(path, "natives")
+        val profileFile = File(mcFolder, "$version.json")
+
+        val project = Project.read()!!.minecraft
+        val profile = MinecraftJson.parse(profileFile.readText())
+
+        val xmx = project.optional?.xmx ?: "4G"
+        val username = project.optional?.username ?: "mmt-${Random.nextInt(1..999)}"
+
+        var classpath = "${mcFolder.absolutePath}/$version.jar"
+
+        librariesFolder.walk().forEach { library ->
+            if (library.isFile && library.name.endsWith(".jar")) {
+                classpath += ";${library.absolutePath}"
+            }
+        }
+
+        logger.info("Starting process...")
+        val process = ProcessBuilder(
+            "java",
+            "-Xmx$xmx",
+            "-Djava.library.path=${nativesFolder.absolutePath}",
+            "-Djna.tmpdir=${nativesFolder.absolutePath}",
+            "-Dorg.lwjgl.system.SharedLibraryExtractPath=${nativesFolder.absolutePath}",
+            "-Dio.netty.native.workdir=${nativesFolder.absolutePath}",
+            "-cp", classpath,
+            "net.fabricmc.loader.impl.launch.knot.KnotClient",
+            "--username", username,
+            "--version", "fabric-loader-$loaderVersion-$version",
+            "--gameDir", "${path.absolutePath}",
+            "--assetsDir", "${assetsFolder.absolutePath}",
+            "--assetIndex", profile.assetIndex.id,
+            "--uuid", "00000000-0000-0000-0000-000000000000",
+            "--accessToken", "0"
+        ).start()
+
+        logger.info("Redirecting logs...")
+
+        val mcLogger = LoggerFactory.getLogger("Minecraft")
+        val outThread = Thread {
+            process.inputStream.bufferedReader().forEachLine {
+                mcLogger.info(it)
+            }
+        }
+        val errThread = Thread {
+            process.errorStream.bufferedReader().forEachLine {
+                mcLogger.error(it)
+            }
+        }
+
+        outThread.isDaemon = true
+        errThread.isDaemon = true
+        outThread.name = "Minecraft process out logger"
+        errThread.name = "Minecraft process err logger"
+        outThread.start()
+        errThread.start()
+
+        process.waitFor()
+        outThread.join()
+        errThread.join()
     }
 
     /*

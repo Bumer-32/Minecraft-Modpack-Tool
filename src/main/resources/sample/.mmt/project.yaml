@@ -1,7 +1,13 @@
 project:
-  name: ^{name}^ # sample
-  author: ^{author}^ # me
+  name: ^{name}^
+  author: ^{author}^
   version: 1.0
-  platform: ^{platform}^ # fabric
-  minecraft: ^{minecraft}^ # 1.21.8
-  loader: ^{loader}^ # 0.17.2 for fabric
+
+minecraft:
+  platform: ^{platform}^ # Platform for modpack
+  minecraft: ^{minecraft}^ # Minecraft version
+  loader: ^{loader}^ # Loader version
+
+  #optional: # Optional settings
+  #  xmx: 4G
+  #  username: TestUser

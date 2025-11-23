@@ -29,7 +29,7 @@ abstract class Platform {
     abstract fun getGameVersions(): Map<String, Boolean>
     abstract fun getLoaderVersions(): Map<String, Boolean>
     abstract fun install(version: String, loaderVersion: String, path: File): Boolean
-    abstract fun launch(mcArgs: String, jvmArgs: String, version: String, loaderVersion: String, path: File)
+    abstract fun launch(version: String, loaderVersion: String, path: File, mcArgs: String? = null, jvmArgs: String? = null)
     abstract fun fastCheck(version: String, loaderVersion: String, path: File): Boolean
 
     protected fun installVanillaVersion(version: String, loaderVersion: String, path: File): Boolean = runBlocking {

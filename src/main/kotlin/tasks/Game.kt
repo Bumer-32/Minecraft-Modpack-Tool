@@ -13,10 +13,10 @@ object Game: Callable<Int> {
     private val logger = LoggerFactory.getLogger(javaClass)
 
     @CommandLine.Option(names = ["-a", "--args"], description = ["Custom arguments for minecraft"])
-    private var mcArgs = ""
+    private var mcArgs: String? = null
 
     @CommandLine.Option(names = ["-j", "--jvmArgs"], description = ["Custom arguments for jvm"])
-    private var jvmArgs = ""
+    private var jvmArgs: String? = null
 
     @CommandLine.Option(names = ["-f", "--force"], description = ["Skips checks"])
     private var force = false
@@ -30,7 +30,7 @@ object Game: Callable<Int> {
 
         logger.info("Reading project")
         if (Project.read() == null) return 1
-        val project = Project.read()!!.project
+        val project = Project.read()!!.minecraft
 
         val check = if (!force) {
             logger.info("Checking minecraft installation")
@@ -49,7 +49,7 @@ object Game: Callable<Int> {
 //        }
 
         logger.info("Launching")
-//        project.platform.realisation.launch(mcArgs, jvmArgs, project.minecraft, project.loader, Project.gameFolder)
+        project.platform.realisation.launch(project.minecraft, project.loader, Project.gameFolder, mcArgs, jvmArgs)
 
         return 0
     }

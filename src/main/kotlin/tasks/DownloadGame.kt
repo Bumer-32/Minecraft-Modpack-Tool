@@ -18,7 +18,7 @@ object DownloadGame: Callable<Int> {
 
         logger.info("Reading project...")
         if (Project.read() == null) return 1
-        val project = Project.read()!!.project
+        val project = Project.read()!!.minecraft
 
         logger.info("Getting versions")
         val gameVersions = project.platform.realisation.getGameVersions()
