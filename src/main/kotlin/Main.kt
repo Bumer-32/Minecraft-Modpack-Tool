@@ -5,11 +5,11 @@ import ch.qos.logback.classic.joran.JoranConfigurator
 import org.slf4j.LoggerFactory
 import org.slf4j.bridge.SLF4JBridgeHandler
 import picocli.CommandLine
-import ua.pp.lumivoid.project.Project
 import ua.pp.lumivoid.tasks.Clean
 import ua.pp.lumivoid.tasks.DownloadGame
 import ua.pp.lumivoid.tasks.Game
 import ua.pp.lumivoid.tasks.Init
+import ua.pp.lumivoid.tasks.SystemInstall
 import java.util.Properties
 import java.util.concurrent.Callable
 import kotlin.jvm.javaClass
@@ -32,7 +32,12 @@ fun main(args: Array<String>) {
         val configurator = JoranConfigurator()
         configurator.context = context
         context.reset()
-        val configStream = Thread.currentThread().contextClassLoader.getResourceAsStream("logback.xml")
+        val resource = when {
+            main.quiet -> "logback-quiet.xml"
+            main.debug -> "logback-debug.xml"
+            else -> "logback.xml"
+        }
+        val configStream = Thread.currentThread().contextClassLoader.getResourceAsStream(resource)
         configurator.doConfigure(configStream)
 
         // and then start logging
@@ -50,9 +55,19 @@ fun main(args: Array<String>) {
             readln()
         }
 
-        if (Project.read() == null) exitProcess(1)
-
-        CommandLine.RunAll().execute(parseResult)
+        return@IExecutionStrategy if (!main.info) {
+            CommandLine.RunAll().execute(parseResult)
+        }
+        else {
+            logger.info("-".repeat(10))
+            logger.info("Minecraft Modpack Tool!")
+            logger.info("Author: Bumer_32")
+            logger.info("Homepage: https://github.com/Bumer-32/Minecraft-Modpack-Tool")
+            logger.info("Version: ${cmd.commandSpec.version()}")
+            logger.info("Install path: ${object{}.javaClass.protectionDomain.codeSource.location.toURI()}")
+            logger.info("-".repeat(10))
+            0
+        }
     }
 
     val exitCode = cmd.execute(*args)
@@ -76,7 +91,8 @@ class VersionProvider: CommandLine.IVersionProvider {
         Init::class,
         Game::class,
         DownloadGame::class,
-        Clean::class
+        Clean::class,
+        SystemInstall::class,
     ],
     mixinStandardHelpOptions = true,
     versionProvider = VersionProvider::class
@@ -91,6 +107,9 @@ object Main: Callable<Int> {
 
     @CommandLine.Option(names = ["-w", "--wait"], description = ["Wait for any key to continue work, for debugging"])
     var wait = false
+
+    @CommandLine.Option(names = ["-i", "--info"], description = ["Prints info about mmt"])
+    var info = false
 
     override fun call(): Int {
         return 0

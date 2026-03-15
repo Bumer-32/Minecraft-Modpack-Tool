@@ -31,7 +31,7 @@ object Init: Callable<Int> {
     @CommandLine.Option(names = ["-P", "--platform"], description = ["Platform of the project, e.g. fabric"])
     private var platform: String? = null
 
-    @CommandLine.Option(names = ["-g", "--game", "-v"], description = ["Version of minecraft, e.g. 1.21.1"])
+    @CommandLine.Option(names = ["-g", "--game"], description = ["Version of minecraft, e.g. 1.21.1"])
     private var game: String? = null
 
     @CommandLine.Option(names = ["-l", "--loader"], description = ["Version of loader, e.g. 0.18.0"])
@@ -39,6 +39,9 @@ object Init: Callable<Int> {
 
     @CommandLine.Option(names = ["--ilovedogs", "--nocats"], description = ["If you hate cats, cat screenshot will not be created in readme"])
     private var noCats = false
+
+    @CommandLine.Option(names = ["-m", "--nommt"], description = ["If you don't want local copy of mmt in your project"])
+    private var noMmt = false
 
     @CommandLine.Option(names = ["-f", "--force"], description = ["Forces project creation if it's possible"])
     private var force = false
@@ -120,7 +123,7 @@ object Init: Callable<Int> {
     private fun generate(path: File, noCats: Boolean, params: Map<String, String>) {
         val httpClient = Constants.httpClient
 
-        logger.info("Coping sample.zip...")
+        logger.info("Copying sample.zip...")
         path.mkdirs()
         val sample = File(path, "sample.zip")
         sample.writeBytes(javaClass.getResource("/sample.zip")!!.readBytes())
@@ -172,6 +175,16 @@ object Init: Callable<Int> {
             lines[index] = ""
         }
         readme.writeText(lines.joinToString("\n"))
+
+        if (!noMmt) {
+            logger.info("Copying mmt.jar")
+            val mmtFile = File(path, ".mmt/mmt.jar")
+            File(javaClass.protectionDomain.codeSource.location.toURI()).copyTo(mmtFile, overwrite = true)
+        } else {
+            File(path, "mmt.bat").delete()
+            File(path, "mmt").delete()
+        }
+
 
         logger.info("")
         logger.info("")

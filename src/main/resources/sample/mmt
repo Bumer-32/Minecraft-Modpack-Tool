@@ -1,0 +1,4 @@
+#!/usr/bin/env bash
+
+JAR="$PWD/.mmt/mmt.jar"
+exec java -jar "$JAR" "$@"

@@ -1,3 +1,4 @@
+import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
 import java.util.Properties
 
 plugins {
@@ -9,7 +10,7 @@ plugins {
 }
 
 group = "ua.pp.lumivoid"
-version = "1.0-SNAPSHOT"
+version = "1.0"
 
 repositories {
     mavenCentral()
@@ -31,9 +32,7 @@ dependencies {
     // https://mvnrepository.com/artifact/org.slf4j/slf4j-api
     implementation("org.slf4j:slf4j-api:2.0.17")
     // https://mvnrepository.com/artifact/ch.qos.logback/logback-classic
-    implementation("ch.qos.logback:logback-classic:1.5.21")
-    // https://mvnrepository.com/artifact/org.codehaus.janino/janino
-    implementation("org.codehaus.janino:janino:3.1.12")
+    implementation("ch.qos.logback:logback-classic:1.5.32")
     // https://mvnrepository.com/artifact/org.slf4j/jul-to-slf4j
     implementation("org.slf4j:jul-to-slf4j:2.0.17")
 
@@ -61,6 +60,7 @@ kotlin {
 
 tasks.processResources {
     dependsOn("packageSampleProject")
+    dependsOn("packageInstallFiles")
     dependsOn("generateVersionProperties")
 }
 
@@ -70,6 +70,14 @@ tasks.register("packageSampleProject", Zip::class) {
     archiveFileName.set("sample.zip")
     destinationDirectory.set(file("build/resources/main/"))
     from("src/main/resources/sample")
+}
+
+tasks.register("packageInstallFiles", Zip::class) {
+    group = "build"
+
+    archiveFileName.set("install.zip")
+    destinationDirectory.set(file("build/resources/main/"))
+    from("src/main/resources/install")
 }
 
 
@@ -89,5 +97,18 @@ tasks.register("generateVersionProperties") {
             setProperty("version", rootProject.version.toString())
         }
         propertiesFile.outputStream().use { out -> properties.store(out, null) }
+    }
+}
+
+tasks.register("mmtInstall") {
+    dependsOn("shadowJar")
+
+    doLast {
+        val shadow = tasks.named<ShadowJar>("shadowJar").get()
+        val source: File = shadow.archiveFile.get().asFile
+        val target = File(System.getProperty("user.home"), ".mmt/mmt.jar")
+        source.copyTo(target, overwrite = true)
+
+        println(target.absolutePath)
     }
 }

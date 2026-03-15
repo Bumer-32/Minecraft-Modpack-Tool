@@ -1,22 +1,14 @@
 <configuration>
-    <condition class="ch.qos.logback.core.boolex.PropertyEqualityCondition">
-        <key>quiet</key>
-        <value>true</value>
-    </condition>
-    <if>
-        <else>
-            <condition class="ch.qos.logback.core.boolex.PropertyEqualityCondition">
-                <key>debug</key>
-                <value>true</value>
-            </condition>
-            <if>
-                <then>
-                    <include resource="logback-debug.xml"/>
-                </then>
-                <else>
-                    <include resource="logback-release.xml"/>
-                </else>
-            </if>
-        </else>
-    </if>
+    <!-- Console output -->
+    <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
+            <pattern>
+                %magenta([%d{HH:mm:ss}]) %highlight(|%-5level|) - %msg%n
+            </pattern>
+        </encoder>
+    </appender>
+
+    <root level="info">
+        <appender-ref ref="STDOUT" />
+    </root>
 </configuration>

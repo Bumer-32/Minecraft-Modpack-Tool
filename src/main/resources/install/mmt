@@ -1,0 +1,17 @@
+#!/usr/bin/env bash
+
+CALL_DIR="$PWD"
+
+LOCAL_JAR="$CALL_DIR/.mmt/mmt.jar"
+USER_JAR="$HOME/.mmt/mmt.jar"
+
+if [ -f "$LOCAL_JAR" ]; then
+    exec java -jar "$LOCAL_JAR" "$@"
+fi
+
+if [ -f "$USER_JAR" ]; then
+    exec java -jar "$USER_JAR" "$@"
+fi
+
+echo "mmt.jar not found"
+exit 1

@@ -13,7 +13,7 @@ object Project {
 
     val projectFolder = File(".")
     val mmtProjectFolder = File(projectFolder, ".mmt")
-    val nogitFolder = File(mmtProjectFolder, "nogit")
+    val nogitFolder = File(mmtProjectFolder, ".nogit")
 
     val projectFile = File(mmtProjectFolder, "project.yaml")
 
